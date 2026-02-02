@@ -1,0 +1,16 @@
+{
+  "short_name": "Lavoro",
+  "name": "WorkTracker Registro Lavori",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2972/2972531.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f4f8",
+  "theme_color": "#3b82f6"
+}
