@@ -544,13 +544,17 @@
         updateUI();
       }
 
-      function handleStop() {
-        archive();
-        state.isRunning = false;
-        state.lastStartTime = null;
-        save();
-        updateUI();
-      }
+      function handleStop() { 
+            archive(); 
+            state.isRunning = false; 
+            state.lastStartTime = null; 
+            
+            // MODIFICA: Resetta il display del timer a zero istantaneamente
+            document.getElementById('timerDisplay').innerText = "00:00:00"; 
+            
+            save(); 
+            updateUI(); 
+        }
       function handleNext() {
         archive();
         state.jobStartTimeStr = new Date().toLocaleTimeString([], {
