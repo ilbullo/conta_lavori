@@ -1,231 +1,589 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <title>WorkTracker Business Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --bg-body: #f1f5f9; --bg-card: #ffffff; --text-main: #1e293b; --border-color: #e2e8f0; }
-        .dark-mode { --bg-body: #0f172a; --bg-card: #1e293b; --text-main: #f1f5f9; --border-color: #334155; }
-        
-        body { background-color: var(--bg-body); color: var(--text-main); touch-action: manipulation; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); transition: background-color 0.3s ease; }
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .card-lavoro { border-left: 6px solid #3b82f6; background-color: var(--bg-card); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
-        .bg-custom-card { background-color: var(--bg-card); transition: background-color 0.3s ease; }
-        
-        /* Stili specifici Dark Mode per il Timer */
-        .dark-mode #timerDisplay { background-color: #020617; color: #22c55e; border-color: #166534; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
-        .dark-mode .text-slate-400 { color: #94a3b8; }
-        .dark-mode .text-slate-700 { color: #cbd5e1; }
-        
-        html { font-size: 16px; }
-        * { -webkit-tap-highlight-color: transparent; }
-        .tag-note { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 6px 14px; border-radius: 10px; background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; transition: all 0.2s; }
-        .dark-mode .tag-note { background: #334155; color: #cbd5e1; border-color: #475569; }
-        .tag-note:active { background: #3b82f6; color: white; scale: 0.95; }
+      :root {
+        --bg-body: #f1f5f9;
+        --bg-card: #ffffff;
+        --text-main: #1e293b;
+        --border-color: #e2e8f0;
+      }
+      .dark-mode {
+        --bg-body: #0f172a;
+        --bg-card: #1e293b;
+        --text-main: #f1f5f9;
+        --border-color: #334155;
+      }
+
+      /* Padding per Notch e Safe Areas */
+      body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        touch-action: manipulation;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding: calc(env(safe-area-inset-top) + 10px) 12px
+          calc(env(safe-area-inset-bottom) + 10px) 12px;
+        transition: background-color 0.3s ease;
+      }
+
+      /* Loader */
+      /* Loader perfettamente centrato */
+      #loader {
+        position: fixed;
+        inset: 0;
+        background: #f1f5f9;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centra orizzontalmente */
+        justify-content: center; /* Centra verticalmente */
+        transition: opacity 0.5s ease;
+      }
+      .dark-mode #loader {
+        background: #0f172a;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #cbd5e1;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .card-lavoro {
+        border-left: 6px solid #3b82f6;
+        background-color: var(--bg-card);
+        border-top: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+      }
+      .bg-custom-card {
+        background-color: var(--bg-card);
+        transition: background-color 0.3s ease;
+      }
+
+      .dark-mode #timerDisplay {
+        background-color: #020617;
+        color: #22c55e;
+        border-color: #166534;
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+      }
+      .dark-mode .text-slate-400 {
+        color: #94a3b8;
+      }
+      .dark-mode .text-slate-700 {
+        color: #cbd5e1;
+      }
+
+      html {
+        font-size: 16px;
+      }
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      .tag-note {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 10px;
+        background: #e2e8f0;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        transition: all 0.2s;
+      }
+      .dark-mode .tag-note {
+        background: #334155;
+        color: #cbd5e1;
+        border-color: #475569;
+      }
+      .tag-note:active {
+        background: #3b82f6;
+        color: white;
+        scale: 0.95;
+      }
     </style>
-</head>
-<body class="p-3 font-sans select-none">
+  </head>
+  <body class="font-sans select-none">
+    <div id="loader">
+      <div class="spinner mb-4"></div>
+      <p
+        class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+      >
+        Caricamento Tracker...
+      </p>
+    </div>
 
     <header class="flex flex-col gap-2 mb-4">
-        <div class="flex justify-between items-center px-1 mb-1">
-            <span class="text-[10px] font-black uppercase tracking-tighter opacity-50">Business Dashboard</span>
-            <button onclick="vibrate(10); toggleDarkMode()" id="darkToggle" class="bg-white dark:bg-slate-800 shadow-sm rounded-full p-2 w-10 h-10 flex items-center justify-center border border-slate-200 dark:border-slate-600 transition-all">
-                🌙
-            </button>
+      <div class="flex justify-between items-center px-1 mb-1">
+        <span
+          class="text-[10px] font-black uppercase tracking-tighter opacity-50"
+          >Business Dashboard</span
+        >
+        <button
+          onclick="
+            vibrate(10);
+            toggleDarkMode();
+          "
+          id="darkToggle"
+          class="bg-white dark:bg-slate-800 shadow-sm rounded-full p-2 w-10 h-10 flex items-center justify-center border border-slate-200 dark:border-slate-600 transition-all"
+        >
+          🌙
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div
+          id="statusCard"
+          class="bg-custom-card p-3 rounded-2xl shadow-sm border-b-2 border-blue-500 flex flex-col justify-center min-h-[75px]"
+        >
+          <h1
+            class="text-lg font-black text-blue-900 dark:text-blue-400 leading-tight"
+            id="jobDisplay"
+          >
+            Lavoro #1
+          </h1>
+          <p
+            class="text-[9px] font-bold uppercase text-blue-500"
+            id="statusLabel"
+          >
+            In attesa
+          </p>
         </div>
-        <div class="grid grid-cols-2 gap-2">
-            <div id="statusCard" class="bg-custom-card p-3 rounded-2xl shadow-sm border-b-2 border-blue-500 flex flex-col justify-center min-h-[75px]">
-                <h1 class="text-lg font-black text-blue-900 dark:text-blue-400 leading-tight" id="jobDisplay">Lavoro #1</h1>
-                <p class="text-[9px] font-bold uppercase text-blue-500" id="statusLabel">In attesa</p>
-            </div>
-            <div class="bg-emerald-600 text-white p-3 rounded-2xl shadow-sm border-b-2 border-emerald-800 text-center flex flex-col justify-center">
-                <p class="text-[9px] font-bold uppercase opacity-80">Incassato Oggi</p>
-                <p class="text-xl font-black" id="totalCash">0€</p>
-            </div>
+        <div
+          class="bg-emerald-600 text-white p-3 rounded-2xl shadow-sm border-b-2 border-emerald-800 text-center flex flex-col justify-center"
+        >
+          <p class="text-[9px] font-bold uppercase opacity-80">
+            Incassato Oggi
+          </p>
+          <p class="text-xl font-black" id="totalCash">0€</p>
         </div>
-        
-        <div class="flex gap-2 items-center">
-            <div class="flex-1 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-2 rounded-xl flex justify-between items-center">
-                <span class="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">Cash</span>
-                <span class="font-black text-emerald-800 dark:text-emerald-300" id="subTotalCash">0€</span>
-            </div>
-            <div class="bg-custom-card border-2 border-blue-100 dark:border-blue-900 h-10 px-3 rounded-full flex items-center justify-center shadow-sm">
-                <span class="text-[10px] font-black text-blue-900 dark:text-blue-300 whitespace-nowrap uppercase"><span id="doneCount" class="text-blue-600 dark:text-blue-400">0</span> Fatti</span>
-            </div>
-            <div class="flex-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-2 rounded-xl flex justify-between items-center">
-                <span class="text-[9px] font-bold text-blue-700 dark:text-blue-400 uppercase">Pos</span>
-                <span class="font-black text-blue-800 dark:text-blue-300" id="subTotalPos">0€</span>
-            </div>
+      </div>
+
+      <div class="flex gap-2 items-center">
+        <div
+          class="flex-1 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-2 rounded-xl flex justify-between items-center"
+        >
+          <span
+            class="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 uppercase"
+            >Cash</span
+          >
+          <span
+            class="font-black text-emerald-800 dark:text-emerald-300"
+            id="subTotalCash"
+            >0€</span
+          >
         </div>
+        <div
+          class="bg-custom-card border-2 border-blue-100 dark:border-blue-900 h-10 px-3 rounded-full flex items-center justify-center shadow-sm"
+        >
+          <span
+            class="text-[10px] font-black text-blue-900 dark:text-blue-300 whitespace-nowrap uppercase"
+            ><span id="doneCount" class="text-blue-600 dark:text-blue-400"
+              >0</span
+            >
+            Fatti</span
+          >
+        </div>
+        <div
+          class="flex-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-2 rounded-xl flex justify-between items-center"
+        >
+          <span
+            class="text-[9px] font-bold text-blue-700 dark:text-blue-400 uppercase"
+            >Pos</span
+          >
+          <span
+            class="font-black text-blue-800 dark:text-blue-300"
+            id="subTotalPos"
+            >0€</span
+          >
+        </div>
+      </div>
     </header>
 
-    <main class="bg-custom-card rounded-[2rem] p-5 shadow-md mb-4 text-center relative">
-        <p class="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest">Tempo lavoro attuale</p>
-        <div id="timerDisplay" class="text-5xl font-mono font-black tracking-tight text-slate-700 mb-4 bg-slate-50 py-4 rounded-2xl shadow-inner border border-slate-100 transition-all">00:00:00</div>
-        <div id="controls" class="flex flex-col gap-2"></div>
+    <main
+      class="bg-custom-card rounded-[2rem] p-5 shadow-md mb-4 text-center relative"
+    >
+      <p
+        class="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest"
+      >
+        Tempo lavoro attuale
+      </p>
+      <div
+        id="timerDisplay"
+        class="text-5xl font-mono font-black tracking-tight text-slate-700 mb-4 bg-slate-50 py-4 rounded-2xl shadow-inner border border-slate-100 transition-all"
+      >
+        00:00:00
+      </div>
+      <div id="controls" class="flex flex-col gap-2"></div>
     </main>
 
     <div class="flex justify-between items-center mb-2 px-1">
-        <h2 class="font-black text-slate-400 uppercase text-[10px] tracking-widest italic">Cronologia</h2>
-        <button onclick="vibrate(10); exportData()" class="text-blue-600 dark:text-blue-400 font-bold text-[11px] flex items-center gap-1 uppercase underline decoration-2">Esporta Report</button>
+      <h2
+        class="font-black text-slate-400 uppercase text-[10px] tracking-widest italic"
+      >
+        Cronologia
+      </h2>
+      <button
+        onclick="
+          vibrate(10);
+          exportData();
+        "
+        class="text-blue-600 dark:text-blue-400 font-bold text-[11px] flex items-center gap-1 uppercase underline decoration-2"
+      >
+        Esporta Report
+      </button>
     </div>
 
     <section id="historyList" class="scroll-area space-y-3 pb-4"></section>
 
     <footer class="py-2 text-center">
-        <button onclick="resetDay()" class="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-50 active:opacity-100 transition-opacity">🗑️ Svuota memoria giornata</button>
+      <button
+        onclick="resetDay()"
+        class="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-50 active:opacity-100 transition-opacity"
+      >
+        🗑️ Svuota memoria giornata
+      </button>
     </footer>
 
-    <div id="modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2rem] p-5 shadow-2xl border border-slate-700">
-            <h3 class="text-lg font-black text-slate-800 dark:text-white mb-4 text-center uppercase tracking-tight">Dettagli Lavoro</h3>
-            
-            <div class="mb-4">
-                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Importo (€)</label>
-                <div class="flex items-center justify-between gap-2 bg-slate-100 dark:bg-slate-700 p-1 rounded-2xl border border-slate-200 dark:border-slate-600">
-                    <button onclick="vibrate(5); adjustPrice(-10)" class="w-12 h-12 bg-white dark:bg-slate-600 rounded-xl font-black text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-500">-10</button>
-                    <input type="number" id="modalPrice" class="w-20 text-center text-2xl font-black bg-transparent outline-none p-0 dark:text-white">
-                    <button onclick="vibrate(5); adjustPrice(10)" class="w-12 h-12 bg-white dark:bg-slate-600 rounded-xl font-black text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-500">+10</button>
-                </div>
-            </div>
+    <div
+      id="modal"
+      class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50"
+    >
+      <div
+        class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2rem] p-5 shadow-2xl border border-slate-700"
+      >
+        <h3
+          class="text-lg font-black text-slate-800 dark:text-white mb-4 text-center uppercase tracking-tight"
+        >
+          Dettagli Lavoro
+        </h3>
 
-            <div class="mb-4">
-                <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 text-center">Metodo Pagamento</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="btnCash" onclick="vibrate(10); setPayment('CASH')" class="py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 transition-all">
-                        <span class="text-lg">💶</span> Contanti
-                    </button>
-                    <button id="btnPos" onclick="vibrate(10); setPayment('POS')" class="py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 transition-all">
-                        <span class="text-lg">💳</span> POS
-                    </button>
-                </div>
-            </div>
-
-            <div class="mb-5">
-                <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Note Rapide</label>
-                <div class="flex flex-wrap gap-3 mb-3 justify-center">
-                    <button onclick="vibrate(5); addQuickNote('Carovana')" class="tag-note">Carovana</button>
-                    <button onclick="vibrate(5); addQuickNote('Nolo')" class="tag-note">Nolo</button>
-                </div>
-                <textarea id="modalInput" rows="2" class="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:text-white" placeholder="Aggiungi una nota..."></textarea>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button onclick="vibrate(30); saveModalData()" class="w-full py-4 bg-emerald-600 text-white font-black text-lg rounded-xl shadow-lg uppercase">Aggiorna</button>
-                <div class="flex justify-between px-2 mt-1">
-                    <button onclick="closeModal()" class="text-slate-400 font-bold text-[10px] uppercase">Annulla</button>
-                    <button onclick="vibrate(50); deleteJob()" class="text-red-400 font-bold text-[10px] uppercase">Elimina</button>
-                </div>
-            </div>
+        <div class="mb-4">
+          <label
+            class="block text-[10px] font-black uppercase text-slate-400 mb-1"
+            >Importo (€)</label
+          >
+          <div
+            class="flex items-center justify-between gap-2 bg-slate-100 dark:bg-slate-700 p-1 rounded-2xl border border-slate-200 dark:border-slate-600"
+          >
+            <button
+              onclick="
+                vibrate(5);
+                adjustPrice(-10);
+              "
+              class="w-12 h-12 bg-white dark:bg-slate-600 rounded-xl font-black text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-500"
+            >
+              -10
+            </button>
+            <input
+              type="number"
+              id="modalPrice"
+              class="w-20 text-center text-2xl font-black bg-transparent outline-none p-0 dark:text-white"
+            />
+            <button
+              onclick="
+                vibrate(5);
+                adjustPrice(10);
+              "
+              class="w-12 h-12 bg-white dark:bg-slate-600 rounded-xl font-black text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-500"
+            >
+              +10
+            </button>
+          </div>
         </div>
+
+        <div class="mb-4">
+          <label
+            class="block text-[10px] font-black uppercase text-slate-400 mb-2 text-center"
+            >Metodo Pagamento</label
+          >
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              id="btnCash"
+              onclick="
+                vibrate(10);
+                setPayment('CASH');
+              "
+              class="py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 transition-all"
+            >
+              <span class="text-lg">💶</span> Contanti
+            </button>
+            <button
+              id="btnPos"
+              onclick="
+                vibrate(10);
+                setPayment('POS');
+              "
+              class="py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 transition-all"
+            >
+              <span class="text-lg">💳</span> POS
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label
+            class="block text-[10px] font-black uppercase text-slate-400 mb-2"
+            >Note Rapide</label
+          >
+          <div class="flex flex-wrap gap-3 mb-3 justify-center">
+            <button
+              onclick="
+                vibrate(5);
+                addQuickNote('Carovana');
+              "
+              class="tag-note"
+            >
+              Carovana
+            </button>
+            <button
+              onclick="
+                vibrate(5);
+                addQuickNote('Nolo');
+              "
+              class="tag-note"
+            >
+              Nolo
+            </button>
+          </div>
+          <textarea
+            id="modalInput"
+            rows="2"
+            class="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:text-white"
+            placeholder="Aggiungi una nota..."
+          ></textarea>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <button
+            onclick="
+              vibrate(30);
+              saveModalData();
+            "
+            class="w-full py-4 bg-emerald-600 text-white font-black text-lg rounded-xl shadow-lg uppercase"
+          >
+            Aggiorna
+          </button>
+          <div class="flex justify-between px-2 mt-1">
+            <button
+              onclick="closeModal()"
+              class="text-slate-400 font-bold text-[10px] uppercase"
+            >
+              Annulla
+            </button>
+            <button
+              onclick="
+                vibrate(50);
+                deleteJob();
+              "
+              class="text-red-400 font-bold text-[10px] uppercase"
+            >
+              Elimina
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        let state = { isRunning: false, lastStartTime: null, jobStartTimeStr: null, history: [], darkMode: false };
-        let editingIndex = null;
-        let selectedPayment = 'CASH';
+      let state = {
+        isRunning: false,
+        lastStartTime: null,
+        jobStartTimeStr: null,
+        history: [],
+        darkMode: null,
+      };
+      let editingIndex = null;
+      let selectedPayment = "CASH";
 
-        function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+      function vibrate(ms) {
+        if (navigator.vibrate) navigator.vibrate(ms);
+      }
 
-        function toggleDarkMode() {
-            state.darkMode = !state.darkMode;
-            applyDarkMode();
-            save();
+      function checkAutoDarkMode() {
+        const hour = new Date().getHours();
+        // Se l'utente non ha mai espresso una preferenza manuale (darkMode è null)
+        if (state.darkMode === null) {
+          return hour >= 20 || hour < 6;
         }
+        return state.darkMode;
+      }
 
-        function applyDarkMode() {
-            const body = document.body;
-            const btn = document.getElementById('darkToggle');
-            if (state.darkMode) {
-                body.classList.add('dark-mode');
-                btn.innerText = '☀️';
-            } else {
-                body.classList.remove('dark-mode');
-                btn.innerText = '🌙';
-            }
+      function toggleDarkMode() {
+        state.darkMode = !document.body.classList.contains("dark-mode");
+        applyDarkMode();
+        save();
+      }
+
+      function applyDarkMode() {
+        const isDark = checkAutoDarkMode();
+        const btn = document.getElementById("darkToggle");
+        if (isDark) {
+          document.body.classList.add("dark-mode");
+          btn.innerText = "☀️";
+        } else {
+          document.body.classList.remove("dark-mode");
+          btn.innerText = "🌙";
         }
+      }
 
-        function load() {
-            const data = localStorage.getItem('workTrackerBizV2');
-            if (data) { 
-                state = JSON.parse(data); 
-                if (state.darkMode === undefined) state.darkMode = false;
-                applyDarkMode();
-                updateUI(); 
-            } else { updateUI(); }
+      function load() {
+        const data = localStorage.getItem("workTrackerBizV2");
+        if (data) {
+          state = JSON.parse(data);
         }
+        applyDarkMode();
+        updateUI();
 
-        function save() { localStorage.setItem('workTrackerBizV2', JSON.stringify(state)); }
+        // Simula caricamento per il loader
+        setTimeout(() => {
+          document.getElementById("loader").style.opacity = "0";
+          setTimeout(
+            () => (document.getElementById("loader").style.display = "none"),
+            500,
+          );
+        }, 800);
+      }
 
-        function formatTime(ms) {
-            let s = Math.floor(ms / 1000);
-            let m = Math.floor(s / 60);
-            let h = Math.floor(m / 60);
-            return [h, m % 60, s % 60].map(v => String(v).padStart(2, '0')).join(':');
-        }
+      function save() {
+        localStorage.setItem("workTrackerBizV2", JSON.stringify(state));
+      }
 
-        function updateUI() {
-            const nextJobNum = state.history.length + 1;
-            let total = 0, cash = 0, pos = 0;
-            state.history.forEach(item => {
-                const p = parseFloat(item.price) || 0;
-                total += p;
-                if(item.method === 'POS') pos += p; else cash += p;
-            });
-            
-            document.getElementById('totalCash').innerText = `${total}€`;
-            document.getElementById('subTotalCash').innerText = `${cash}€`;
-            document.getElementById('subTotalPos').innerText = `${pos}€`;
-            document.getElementById('doneCount').innerText = state.history.length;
-            
-            const controls = document.getElementById('controls');
-            const statusLabel = document.getElementById('statusLabel');
-            const jobDisplay = document.getElementById('jobDisplay');
-            const statusCard = document.getElementById('statusCard');
+      function formatTime(ms) {
+        let s = Math.floor(ms / 1000);
+        let m = Math.floor(s / 60);
+        let h = Math.floor(m / 60);
+        return [h, m % 60, s % 60]
+          .map((v) => String(v).padStart(2, "0"))
+          .join(":");
+      }
 
-            if (state.isRunning) {
-                jobDisplay.innerText = `Lavoro #${nextJobNum}`;
-                jobDisplay.className = "text-lg font-black text-blue-900 dark:text-blue-400 leading-tight";
-                statusLabel.innerText = "● Stai lavorando";
-                statusLabel.className = "text-[9px] font-bold uppercase text-blue-500 animate-pulse";
-                statusCard.style.borderColor = "#3b82f6";
-                controls.innerHTML = `<button onclick="vibrate(20); handleNext()" class="py-5 rounded-2xl text-xl font-black bg-green-500 text-white shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 uppercase">Prossimo Lavoro</button>
+      function updateUI() {
+        const nextJobNum = state.history.length + 1;
+        let total = 0,
+          cash = 0,
+          pos = 0;
+        state.history.forEach((item) => {
+          const p = parseFloat(item.price) || 0;
+          total += p;
+          if (item.method === "POS") pos += p;
+          else cash += p;
+        });
+
+        document.getElementById("totalCash").innerText = `${total}€`;
+        document.getElementById("subTotalCash").innerText = `${cash}€`;
+        document.getElementById("subTotalPos").innerText = `${pos}€`;
+        document.getElementById("doneCount").innerText = state.history.length;
+
+        const controls = document.getElementById("controls");
+        const statusLabel = document.getElementById("statusLabel");
+        const jobDisplay = document.getElementById("jobDisplay");
+        const statusCard = document.getElementById("statusCard");
+
+        if (state.isRunning) {
+          jobDisplay.innerText = `Lavoro #${nextJobNum}`;
+          jobDisplay.className =
+            "text-lg font-black text-blue-900 dark:text-blue-400 leading-tight";
+          statusLabel.innerText = "● Stai lavorando";
+          statusLabel.className =
+            "text-[9px] font-bold uppercase text-blue-500 animate-pulse";
+          statusCard.style.borderColor = "#3b82f6";
+          controls.innerHTML = `<button onclick="vibrate(20); handleNext()" class="py-5 rounded-2xl text-xl font-black bg-green-500 text-white shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 uppercase">Prossimo Lavoro</button>
                     <button onclick="vibrate(10); handleStop()" class="py-3 rounded-xl text-sm font-bold bg-rose-50 dark:bg-rose-900/30 text-rose-600 border border-rose-200 dark:border-rose-900 uppercase">Fermati</button>`;
-            } else {
-                jobDisplay.innerText = "PAUSA";
-                jobDisplay.className = "text-2xl font-black text-amber-500 leading-none mb-1";
-                statusLabel.innerHTML = `Prossimo lavoro: <span class="text-slate-600 dark:text-slate-400">#${nextJobNum}</span>`;
-                statusLabel.className = "text-[9px] font-bold uppercase text-slate-400";
-                statusCard.style.borderColor = "#f59e0b";
-                controls.innerHTML = `<button onclick="vibrate(30); handleStart()" class="py-6 rounded-2xl text-2xl font-black bg-blue-600 text-white shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 uppercase">Inizia Lavoro</button>`;
-            }
-            renderHistory();
+        } else {
+          jobDisplay.innerText = "PAUSA";
+          jobDisplay.className =
+            "text-2xl font-black text-amber-500 leading-none mb-1";
+          statusLabel.innerHTML = `Prossimo lavoro: <span class="text-slate-600 dark:text-slate-400">#${nextJobNum}</span>`;
+          statusLabel.className =
+            "text-[9px] font-bold uppercase text-slate-400";
+          statusCard.style.borderColor = "#f59e0b";
+          controls.innerHTML = `<button onclick="vibrate(30); handleStart()" class="py-6 rounded-2xl text-2xl font-black bg-blue-600 text-white shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 uppercase">Inizia Lavoro</button>`;
         }
+        renderHistory();
+      }
 
-        function handleStart() {
-            state.jobStartTimeStr = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            state.lastStartTime = Date.now();
-            state.isRunning = true;
-            save(); updateUI();
-        }
+      function handleStart() {
+        state.jobStartTimeStr = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        state.lastStartTime = Date.now();
+        state.isRunning = true;
+        save();
+        updateUI();
+      }
 
-        function handleStop() { archive(); state.isRunning = false; state.lastStartTime = null; save(); updateUI(); }
-        function handleNext() { archive(); state.jobStartTimeStr = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); state.lastStartTime = Date.now(); save(); updateUI(); }
+      function handleStop() {
+        archive();
+        state.isRunning = false;
+        state.lastStartTime = null;
+        save();
+        updateUI();
+      }
+      function handleNext() {
+        archive();
+        state.jobStartTimeStr = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        state.lastStartTime = Date.now();
+        save();
+        updateUI();
+      }
 
-        function archive() {
-            const totalMs = Date.now() - state.lastStartTime;
-            state.history.unshift({ duration: formatTime(totalMs), start: state.jobStartTimeStr, end: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), note: "", price: 90, method: "CASH" });
-        }
+      function archive() {
+        const totalMs = Date.now() - state.lastStartTime;
+        state.history.unshift({
+          duration: formatTime(totalMs),
+          start: state.jobStartTimeStr,
+          end: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          note: "",
+          price: 90,
+          method: "CASH",
+        });
+      }
 
-        function renderHistory() {
-            const list = document.getElementById('historyList');
-            const total = state.history.length;
-            list.innerHTML = state.history.map((item, i) => `
+      function renderHistory() {
+        const list = document.getElementById("historyList");
+        const total = state.history.length;
+        list.innerHTML =
+          state.history
+            .map(
+              (item, i) => `
                 <div onclick="vibrate(5); openModal(${i})" class="card-lavoro rounded-xl p-3 shadow-sm flex items-center justify-between">
                     <div>
                         <span class="text-[9px] font-black text-blue-400 uppercase">#${total - i}</span>
@@ -234,62 +592,103 @@
                     </div>
                     <div class="text-right flex flex-col items-end gap-1">
                         <div class="flex items-center gap-1">
-                            <span class="text-xs">${item.method === 'POS' ? '💳' : '💶'}</span>
+                            <span class="text-xs">${item.method === "POS" ? "💳" : "💶"}</span>
                             <span class="text-lg font-black text-emerald-600 dark:text-emerald-400">${item.price}€</span>
                         </div>
-                        <p class="text-[10px] text-slate-400 italic line-clamp-1 max-w-[100px]">${item.note || 'Nota'}</p>
+                        <p class="text-[10px] text-slate-400 italic line-clamp-1 max-w-[100px]">${item.note || "Nota"}</p>
                     </div>
                 </div>
-            `).join('') || `<p class="text-center text-slate-300 py-10 text-[10px] uppercase italic">Nessuna attività</p>`;
+            `,
+            )
+            .join("") ||
+          `<p class="text-center text-slate-300 py-10 text-[10px] uppercase italic">Nessuna attività</p>`;
+      }
+
+      function setPayment(method) {
+        selectedPayment = method;
+        document.getElementById("btnCash").className =
+          method === "CASH"
+            ? "py-3 border-2 border-emerald-500 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+            : "py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 text-slate-400";
+        document.getElementById("btnPos").className =
+          method === "POS"
+            ? "py-3 border-2 border-blue-500 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
+            : "py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 text-slate-400";
+      }
+
+      function addQuickNote(text) {
+        const area = document.getElementById("modalInput");
+        area.value = area.value ? area.value + ", " + text : text;
+      }
+
+      function openModal(i) {
+        editingIndex = i;
+        document.getElementById("modalInput").value = state.history[i].note;
+        document.getElementById("modalPrice").value = state.history[i].price;
+        setPayment(state.history[i].method || "CASH");
+        document.getElementById("modal").classList.remove("hidden");
+      }
+
+      function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+      }
+      function adjustPrice(val) {
+        const inp = document.getElementById("modalPrice");
+        inp.value = Math.max(0, parseInt(inp.value) + val);
+      }
+
+      function saveModalData() {
+        state.history[editingIndex].note =
+          document.getElementById("modalInput").value;
+        state.history[editingIndex].price =
+          document.getElementById("modalPrice").value;
+        state.history[editingIndex].method = selectedPayment;
+        save();
+        updateUI();
+        closeModal();
+      }
+
+      function deleteJob() {
+        if (confirm("Eliminare dallo storico?")) {
+          state.history.splice(editingIndex, 1);
+          save();
+          updateUI();
+          closeModal();
         }
-
-        function setPayment(method) {
-            selectedPayment = method;
-            const isDark = state.darkMode;
-            document.getElementById('btnCash').className = method === 'CASH' ? 'py-3 border-2 border-emerald-500 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' : 'py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 text-slate-400';
-            document.getElementById('btnPos').className = method === 'POS' ? 'py-3 border-2 border-blue-500 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400' : 'py-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 dark:bg-slate-900 text-slate-400';
+      }
+      function resetDay() {
+        vibrate(50);
+        if (confirm("⚠️ Svuotare tutto?")) {
+          localStorage.removeItem("workTrackerBizV2");
+          location.reload();
         }
+      }
 
-        function addQuickNote(text) {
-            const area = document.getElementById('modalInput');
-            area.value = area.value ? area.value + ", " + text : text;
-        }
+      function exportData() {
+        let total = 0,
+          cash = 0,
+          pos = 0;
+        state.history.forEach((item) => {
+          const p = parseFloat(item.price) || 0;
+          total += p;
+          if (item.method === "POS") pos += p;
+          else cash += p;
+        });
+        let text = `📅 REPORT OGGI: ${total}€\nLAVORI: ${state.history.length}\n💶 Cash: ${cash}€\n💳 POS: ${pos}€\n`;
+        state.history.forEach((item, i) => {
+          text += `\n#${state.history.length - i} | ${item.price}€ (${item.method}) | ${item.duration}`;
+        });
+        if (navigator.share) navigator.share({ text: text });
+        else alert("Report copiato!");
+      }
 
-        function openModal(i) {
-            editingIndex = i;
-            document.getElementById('modalInput').value = state.history[i].note;
-            document.getElementById('modalPrice').value = state.history[i].price;
-            setPayment(state.history[i].method || 'CASH');
-            document.getElementById('modal').classList.remove('hidden');
-        }
-
-        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-        function adjustPrice(val) { const inp = document.getElementById('modalPrice'); inp.value = Math.max(0, parseInt(inp.value) + val); }
-
-        function saveModalData() {
-            state.history[editingIndex].note = document.getElementById('modalInput').value;
-            state.history[editingIndex].price = document.getElementById('modalPrice').value;
-            state.history[editingIndex].method = selectedPayment;
-            save(); updateUI(); closeModal();
-        }
-
-        function deleteJob() { if (confirm("Eliminare dallo storico?")) { state.history.splice(editingIndex, 1); save(); updateUI(); closeModal(); } }
-        function resetDay() { vibrate(50); if (confirm("⚠️ Svuotare tutto?")) { localStorage.removeItem('workTrackerBizV2'); location.reload(); } }
-
-        function exportData() {
-            let total = 0, cash = 0, pos = 0;
-            state.history.forEach(item => {
-                const p = parseFloat(item.price) || 0;
-                total += p;
-                if(item.method === 'POS') pos += p; else cash += p;
-            });
-            let text = `📅 REPORT OGGI: ${total}€\nLAVORI: ${state.history.length}\n💶 Cash: ${cash}€\n💳 POS: ${pos}€\n`;
-            state.history.forEach((item, i) => { text += `\n#${state.history.length - i} | ${item.price}€ (${item.method}) | ${item.duration}`; });
-            if (navigator.share) navigator.share({ text: text }); else alert("Report copiato!");
-        }
-
-        setInterval(() => { if (state.isRunning) document.getElementById('timerDisplay').innerText = formatTime(Date.now() - state.lastStartTime); }, 1000);
-        window.onload = load;
+      setInterval(() => {
+        if (state.isRunning)
+          document.getElementById("timerDisplay").innerText = formatTime(
+            Date.now() - state.lastStartTime,
+          );
+      }, 1000);
+      window.onload = load;
     </script>
-</body>
+  </body>
 </html>
