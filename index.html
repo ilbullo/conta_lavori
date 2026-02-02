@@ -5,112 +5,109 @@
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Lavoro">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2972/2972531.png">
-    <meta name="theme-color" content="#3b82f6">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <title>Registro Lavori</title>
+    <title>WorkTracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { 
-            background-color: #f0f4f8; 
-            touch-action: manipulation; 
-            overflow: hidden; 
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding-top: env(safe-area-inset-top);
-        }
-        .card-lavoro { border-left: 8px solid #3b82f6; }
+        body { background-color: #f1f5f9; touch-action: manipulation; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); }
         .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        html { font-size: 18px; }
+        .card-lavoro { border-left: 6px solid #3b82f6; }
+        .btn-active { border-color: #3b82f6 !important; background-color: #eff6ff !important; color: #1d4ed8 !important; }
+        html { font-size: 16px; }
         * { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
-<body class="p-4 font-sans select-none text-slate-800">
+<body class="p-3 font-sans select-none text-slate-800">
 
-    <header class="flex justify-between items-center mb-6 bg-white p-5 rounded-3xl shadow-md border-b-4 border-blue-500">
-        <div>
-            <h1 class="text-3xl font-black text-blue-900" id="jobDisplay">Lavoro #1</h1>
-            <p class="text-sm font-bold uppercase tracking-wide flex items-center gap-2" id="statusLabel">
-                </p>
+    <header class="flex flex-col gap-2 mb-4">
+        <div class="grid grid-cols-2 gap-2">
+            <div class="bg-white p-3 rounded-2xl shadow-sm border-b-2 border-blue-500">
+                <h1 class="text-lg font-black text-blue-900" id="jobDisplay">Lavoro #1</h1>
+                <p class="text-[9px] font-bold uppercase text-blue-500" id="statusLabel"></p>
+            </div>
+            <div class="bg-emerald-600 text-white p-3 rounded-2xl shadow-sm border-b-2 border-emerald-800 text-center">
+                <p class="text-[9px] font-bold uppercase opacity-80">Incassato</p>
+                <p class="text-xl font-black" id="totalCash">0€</p>
+            </div>
         </div>
-        <div class="bg-blue-900 text-white px-4 py-3 rounded-2xl flex flex-col items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 mb-1 opacity-70">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-2xl font-black leading-none" id="totalDone">0</p>
+        
+        <div class="grid grid-cols-2 gap-2">
+            <div class="bg-emerald-50 border border-emerald-200 p-2 rounded-xl flex justify-between items-center">
+                <span class="text-[9px] font-bold text-emerald-700">💶 CONTANTI</span>
+                <span class="font-black text-emerald-800" id="subTotalCash">0€</span>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 p-2 rounded-xl flex justify-between items-center">
+                <span class="text-[9px] font-bold text-blue-700">💳 POS</span>
+                <span class="font-black text-blue-800" id="subTotalPos">0€</span>
+            </div>
         </div>
     </header>
 
-    <main class="bg-white rounded-[2.5rem] p-6 shadow-xl mb-6 text-center border-2 border-white">
-        <div id="timerDisplay" class="text-6xl font-mono font-black tracking-tighter text-slate-800 mb-6 bg-slate-100 py-6 rounded-3xl shadow-inner border border-slate-200">
+    <main class="bg-white rounded-[2rem] p-5 shadow-md mb-4 text-center">
+        <div id="timerDisplay" class="text-5xl font-mono font-black tracking-tight text-slate-700 mb-4 bg-slate-50 py-4 rounded-2xl shadow-inner border border-slate-100">
             00:00:00
         </div>
-        
-        <div id="controls" class="flex flex-col gap-3">
-            </div>
-
-        <div id="startTimeLabel" class="mt-4 text-sm font-bold text-slate-400 hidden flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clip-rule="evenodd" />
-            </svg>
-            Inizio ore <span id="startVal" class="text-slate-800">--:--</span>
-        </div>
+        <div id="controls" class="flex flex-col gap-2"></div>
     </main>
 
-    <div class="flex justify-between items-center mb-4 px-2">
-        <h2 class="font-black text-slate-500 uppercase tracking-widest text-xs">I tuoi lavori</h2>
-        <button onclick="exportData()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-bold text-xs shadow-sm flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0-10.628a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zm0 10.628a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" />
-            </svg>
-            Condividi
-        </button>
+    <div class="flex justify-between items-center mb-2 px-1">
+        <h2 class="font-black text-slate-400 uppercase text-[10px] tracking-widest italic">Cronologia</h2>
+        <button onclick="exportData()" class="text-blue-600 font-bold text-[11px] flex items-center gap-1 uppercase">Esporta</button>
     </div>
 
-    <section id="historyList" class="scroll-area space-y-4 pb-24 px-1">
-        </section>
+    <section id="historyList" class="scroll-area space-y-3 pb-20"></section>
 
-    <div id="modal" class="fixed inset-0 bg-blue-900/80 backdrop-blur-sm hidden flex items-center justify-center p-6 z-50">
-        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl">
-            <h3 class="text-2xl font-black text-slate-800 mb-4 text-center">Nota Lavoro</h3>
-            <textarea id="modalInput" rows="3" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-xl outline-none mb-6 focus:border-blue-500" placeholder="Cosa hai fatto oggi?"></textarea>
-            <div class="flex flex-col gap-3">
-                <button onclick="saveModalNote()" class="w-full py-5 bg-blue-600 text-white font-black text-xl rounded-2xl shadow-lg flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                        <path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clip-rule="evenodd" />
-                    </svg>
-                    SALVA NOTA
-                </button>
-                <button onclick="closeModal()" class="w-full py-4 text-slate-400 font-bold">CHIUDI</button>
-                <hr class="my-2 border-slate-100">
-                <button onclick="deleteJob()" class="w-full py-3 text-red-500 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-red-400">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
-                    Elimina Lavoro
-                </button>
+    <div id="modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-sm rounded-[2rem] p-5 shadow-2xl">
+            <h3 class="text-lg font-black text-slate-800 mb-4 text-center uppercase">Dettagli Lavoro</h3>
+            
+            <div class="mb-4">
+                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Prezzo (€)</label>
+                <div class="flex items-center justify-between gap-2 bg-slate-100 p-1 rounded-2xl">
+                    <button onclick="adjustPrice(-10)" class="w-12 h-12 bg-white rounded-xl font-black text-blue-600 shadow-sm border border-slate-200">-10</button>
+                    <input type="number" id="modalPrice" class="w-20 text-center text-2xl font-black bg-transparent outline-none p-0" value="90">
+                    <button onclick="adjustPrice(10)" class="w-12 h-12 bg-white rounded-xl font-black text-blue-600 shadow-sm border border-slate-200">+10</button>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 text-center">Metodo Pagamento</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btnCash" onclick="setPayment('CASH')" class="py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50">
+                        <span class="text-xl">💶</span> Contanti
+                    </button>
+                    <button id="btnPos" onclick="setPayment('POS')" class="py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50">
+                        <span class="text-xl">💳</span> POS
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <textarea id="modalInput" rows="2" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500" placeholder="Aggiungi una nota..."></textarea>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button onclick="saveModalData()" class="w-full py-4 bg-emerald-600 text-white font-black text-lg rounded-xl shadow-lg uppercase">Aggiorna</button>
+                <div class="flex justify-between px-2 mt-1">
+                    <button onclick="closeModal()" class="text-slate-400 font-bold text-[10px] uppercase">Annulla</button>
+                    <button onclick="deleteJob()" class="text-red-400 font-bold text-[10px] uppercase">Elimina</button>
+                </div>
             </div>
         </div>
     </div>
-
-    <footer class="mt-auto py-4 text-center">
-        <button onclick="resetDay()" class="text-slate-400 text-[10px] font-bold uppercase underline">Svuota memoria della giornata</button>
-    </footer>
 
     <script>
         let state = { isRunning: false, lastStartTime: null, jobStartTimeStr: null, history: [] };
         let editingIndex = null;
+        let selectedPayment = 'CASH';
 
         function load() {
-            const data = localStorage.getItem('workTrackerV12');
+            const data = localStorage.getItem('workTrackerBizV2');
             if (data) { state = JSON.parse(data); updateUI(); }
             else { updateUI(); }
         }
 
-        function save() { localStorage.setItem('workTrackerV12', JSON.stringify(state)); }
+        function save() { localStorage.setItem('workTrackerBizV2', JSON.stringify(state)); }
 
         function formatTime(ms) {
             let s = Math.floor(ms / 1000);
@@ -121,43 +118,34 @@
 
         function updateUI() {
             const currentNum = state.history.length + 1;
-            const statusLabel = document.getElementById('statusLabel');
+            let total = 0, cash = 0, pos = 0;
+            state.history.forEach(item => {
+                const p = parseFloat(item.price) || 0;
+                total += p;
+                if(item.method === 'POS') pos += p; else cash += p;
+            });
+            
             document.getElementById('jobDisplay').innerText = `Lavoro #${currentNum}`;
-            document.getElementById('totalDone').innerText = state.history.length;
+            document.getElementById('totalCash').innerText = `${total}€`;
+            document.getElementById('subTotalCash').innerText = `${cash}€`;
+            document.getElementById('subTotalPos').innerText = `${pos}€`;
+            
             const controls = document.getElementById('controls');
-            const label = document.getElementById('startTimeLabel');
+            const statusLabel = document.getElementById('statusLabel');
 
             if (state.isRunning) {
-                statusLabel.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Stai lavorando ora...`;
-                statusLabel.className = "text-sm font-bold uppercase tracking-wide text-blue-500 flex items-center gap-2";
+                statusLabel.innerText = "● Timer Attivo";
+                statusLabel.className = "text-[9px] font-bold uppercase text-blue-500 animate-pulse";
                 controls.innerHTML = `
-                    <button onclick="handleNext()" class="w-full py-6 rounded-3xl text-2xl font-black bg-green-500 text-white shadow-xl border-b-8 border-green-700 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
-                            <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" />
-                        </svg>
-                        PROSSIMO
-                    </button>
-                    <button onclick="handleStop()" class="w-full py-4 rounded-3xl text-lg font-bold bg-rose-100 text-rose-600 border-2 border-rose-500 flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                            <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 013-3h9a3 3 0 013 3v9a3 3 0 01-3 3h-9a3 3 0 01-3-3v-9z" clip-rule="evenodd" />
-                        </svg>
-                        STOP
-                    </button>
+                    <button onclick="handleNext()" class="py-5 rounded-2xl text-xl font-black bg-green-500 text-white shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 uppercase tracking-tight">Prossimo</button>
+                    <button onclick="handleStop()" class="py-3 rounded-xl text-sm font-bold bg-rose-50 text-rose-600 border border-rose-200 uppercase">Fermati</button>
                 `;
-                label.classList.remove('hidden');
-                document.getElementById('startVal').innerText = state.jobStartTimeStr;
             } else {
-                statusLabel.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> Sei in pausa`;
-                statusLabel.className = "text-sm font-bold uppercase tracking-wide text-amber-500 flex items-center gap-2";
+                statusLabel.innerText = "In pausa";
+                statusLabel.className = "text-[9px] font-bold uppercase text-amber-500";
                 controls.innerHTML = `
-                    <button onclick="handleStart()" class="w-full py-8 rounded-3xl text-3xl font-black bg-blue-600 text-white shadow-xl border-b-8 border-blue-800 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-3 tracking-tighter">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10">
-                            <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" />
-                        </svg>
-                        AVVIA
-                    </button>
+                    <button onclick="handleStart()" class="py-6 rounded-2xl text-2xl font-black bg-blue-600 text-white shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 uppercase tracking-tight">Inizia</button>
                 `;
-                label.classList.add('hidden');
             }
             renderHistory();
         }
@@ -178,7 +166,9 @@
                 duration: formatTime(totalMs),
                 start: state.jobStartTimeStr,
                 end: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-                note: ""
+                note: "",
+                price: 90,
+                method: "CASH"
             });
         }
 
@@ -186,47 +176,62 @@
             const list = document.getElementById('historyList');
             const total = state.history.length;
             list.innerHTML = state.history.map((item, i) => `
-                <div onclick="openModal(${i})" class="card-lavoro bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between border border-slate-200">
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[10px] font-black text-blue-500 uppercase">Lavoro #${total - i}</span>
-                        <span class="text-2xl font-mono font-black text-slate-800">${item.duration}</span>
-                        <div class="flex items-center gap-3 text-[11px] font-bold text-slate-400">
-                            <span class="flex items-center gap-1"><svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 16l-4-4m0 0l4-4m-4 4h14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg> ${item.start}</span>
-                            <span class="flex items-center gap-1"><svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 8l4 4m0 0l-4 4m4-4H3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg> ${item.end}</span>
-                        </div>
+                <div onclick="openModal(${i})" class="card-lavoro bg-white rounded-xl p-3 shadow-sm flex items-center justify-between border border-slate-100">
+                    <div>
+                        <span class="text-[9px] font-black text-blue-400 uppercase">#${total - i}</span>
+                        <p class="text-xl font-mono font-black text-slate-700 leading-none">${item.duration}</p>
+                        <p class="text-[10px] font-bold text-slate-400 mt-1">${item.start} ➜ ${item.end}</p>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl max-w-[45%] border border-slate-100 relative min-w-[80px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 absolute top-1 right-1 text-slate-300">
-                            <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.154-1.262a.5.5 0 00.271-.271l10.87-10.87a2.121 2.121 0 10-3-3L2.966 14.492a.5.5 0 00-.271.271z" />
-                        </svg>
-                        <p class="text-[13px] text-slate-500 italic line-clamp-2 leading-tight pr-2">
-                            ${item.note || 'Scrivi...'}
-                        </p>
+                    <div class="text-right flex flex-col items-end gap-1">
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs">${item.method === 'POS' ? '💳' : '💶'}</span>
+                            <span class="text-lg font-black text-emerald-600">${item.price}€</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 italic line-clamp-1 max-w-[100px]">${item.note || 'Nota'}</p>
                     </div>
                 </div>
-            `).join('') || `<p class="text-center text-slate-300 py-10 text-sm italic">Nessun lavoro oggi.</p>`;
+            `).join('') || `<p class="text-center text-slate-300 py-10 text-[10px] uppercase italic">Nessuna attività</p>`;
         }
 
-        function openModal(i) { editingIndex = i; document.getElementById('modalInput').value = state.history[i].note; document.getElementById('modal').classList.remove('hidden'); }
+        function setPayment(method) {
+            selectedPayment = method;
+            document.getElementById('btnCash').className = method === 'CASH' ? 'py-3 border-2 border-emerald-500 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-emerald-50 text-emerald-700' : 'py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50 text-slate-400';
+            document.getElementById('btnPos').className = method === 'POS' ? 'py-3 border-2 border-blue-500 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-blue-50 text-blue-700' : 'py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50 text-slate-400';
+        }
+
+        function openModal(i) {
+            editingIndex = i;
+            document.getElementById('modalInput').value = state.history[i].note;
+            document.getElementById('modalPrice').value = state.history[i].price;
+            setPayment(state.history[i].method || 'CASH');
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-        function saveModalNote() { state.history[editingIndex].note = document.getElementById('modalInput').value; save(); updateUI(); closeModal(); }
-        function deleteJob() { if (confirm("Sei sicuro di voler eliminare questo lavoro?")) { state.history.splice(editingIndex, 1); save(); updateUI(); closeModal(); } }
-        function resetDay() { if (confirm("Attenzione! Questo cancellerà tutto lo storico di oggi. Vuoi continuare?")) { localStorage.removeItem('workTrackerV12'); location.reload(); } }
+        function adjustPrice(val) { const inp = document.getElementById('modalPrice'); inp.value = Math.max(0, parseInt(inp.value) + val); }
 
-        function exportData() {
-            let text = "RELAZIONE LAVORI:\n";
-            const total = state.history.length;
-            state.history.forEach((item, i) => { text += `\nLavoro #${total - i} (${item.start}-${item.end})\nDurata: ${item.duration}\nNote: ${item.note || '-'}\n`; });
-            if (navigator.share) navigator.share({ text: text });
-            else { alert("Copiato!"); navigator.clipboard.writeText(text); }
+        function saveModalData() {
+            state.history[editingIndex].note = document.getElementById('modalInput').value;
+            state.history[editingIndex].price = document.getElementById('modalPrice').value;
+            state.history[editingIndex].method = selectedPayment;
+            save(); updateUI(); closeModal();
         }
 
-        setInterval(() => {
-            if (state.isRunning) {
-                document.getElementById('timerDisplay').innerText = formatTime(Date.now() - state.lastStartTime);
-            } else { document.getElementById('timerDisplay').innerText = "00:00:00"; }
-        }, 1000);
+        function deleteJob() { if (confirm("Eliminare?")) { state.history.splice(editingIndex, 1); save(); updateUI(); closeModal(); } }
+        
+        function exportData() {
+            let total = 0, cash = 0, pos = 0;
+            state.history.forEach(item => {
+                const p = parseFloat(item.price) || 0;
+                total += p;
+                if(item.method === 'POS') pos += p; else cash += p;
+            });
+            let text = `💰 REPORT: ${total}€ (Contanti: ${cash}€, POS: ${pos}€)\n`;
+            state.history.forEach((item, i) => { text += `\n#${state.history.length - i} | ${item.price}€ (${item.method}) | ${item.duration}`; });
+            if (navigator.share) navigator.share({ text: text }); else alert("Copiato!");
+        }
 
+        setInterval(() => { if (state.isRunning) document.getElementById('timerDisplay').innerText = formatTime(Date.now() - state.lastStartTime); }, 1000);
         window.onload = load;
     </script>
 </body>
