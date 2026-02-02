@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WorkTracker</title>
+    <title>WorkTracker Business Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #f1f5f9; touch-action: manipulation; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); }
@@ -21,29 +21,33 @@
 
     <header class="flex flex-col gap-2 mb-4">
         <div class="grid grid-cols-2 gap-2">
-            <div class="bg-white p-3 rounded-2xl shadow-sm border-b-2 border-blue-500">
-                <h1 class="text-lg font-black text-blue-900" id="jobDisplay">Lavoro #1</h1>
-                <p class="text-[9px] font-bold uppercase text-blue-500" id="statusLabel"></p>
+            <div id="statusCard" class="bg-white p-3 rounded-2xl shadow-sm border-b-2 border-blue-500 flex flex-col justify-center min-h-[75px]">
+                <h1 class="text-lg font-black text-blue-900 leading-tight" id="jobDisplay">Lavoro #1</h1>
+                <p class="text-[9px] font-bold uppercase text-blue-500" id="statusLabel">In attesa</p>
             </div>
-            <div class="bg-emerald-600 text-white p-3 rounded-2xl shadow-sm border-b-2 border-emerald-800 text-center">
-                <p class="text-[9px] font-bold uppercase opacity-80">Incassato</p>
+            <div class="bg-emerald-600 text-white p-3 rounded-2xl shadow-sm border-b-2 border-emerald-800 text-center flex flex-col justify-center">
+                <p class="text-[9px] font-bold uppercase opacity-80">Incassato Oggi</p>
                 <p class="text-xl font-black" id="totalCash">0€</p>
             </div>
         </div>
         
-        <div class="grid grid-cols-2 gap-2">
-            <div class="bg-emerald-50 border border-emerald-200 p-2 rounded-xl flex justify-between items-center">
-                <span class="text-[9px] font-bold text-emerald-700">💶 CONTANTI</span>
+        <div class="flex gap-2 items-center">
+            <div class="flex-1 bg-emerald-50 border border-emerald-200 p-2 rounded-xl flex justify-between items-center">
+                <span class="text-[9px] font-bold text-emerald-700 uppercase">Cash</span>
                 <span class="font-black text-emerald-800" id="subTotalCash">0€</span>
             </div>
-            <div class="bg-blue-50 border border-blue-200 p-2 rounded-xl flex justify-between items-center">
-                <span class="text-[9px] font-bold text-blue-700">💳 POS</span>
+            <div class="bg-white border-2 border-blue-100 h-10 px-3 rounded-full flex items-center justify-center shadow-sm">
+                <span class="text-[10px] font-black text-blue-900 whitespace-nowrap uppercase"><span id="doneCount" class="text-blue-600">0</span> Fatti</span>
+            </div>
+            <div class="flex-1 bg-blue-50 border border-blue-200 p-2 rounded-xl flex justify-between items-center">
+                <span class="text-[9px] font-bold text-blue-700 uppercase">Pos</span>
                 <span class="font-black text-blue-800" id="subTotalPos">0€</span>
             </div>
         </div>
     </header>
 
-    <main class="bg-white rounded-[2rem] p-5 shadow-md mb-4 text-center">
+    <main class="bg-white rounded-[2rem] p-5 shadow-md mb-4 text-center relative">
+        <p class="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest">Tempo lavoro attuale</p>
         <div id="timerDisplay" class="text-5xl font-mono font-black tracking-tight text-slate-700 mb-4 bg-slate-50 py-4 rounded-2xl shadow-inner border border-slate-100">
             00:00:00
         </div>
@@ -52,18 +56,24 @@
 
     <div class="flex justify-between items-center mb-2 px-1">
         <h2 class="font-black text-slate-400 uppercase text-[10px] tracking-widest italic">Cronologia</h2>
-        <button onclick="exportData()" class="text-blue-600 font-bold text-[11px] flex items-center gap-1 uppercase">Esporta</button>
+        <button onclick="exportData()" class="text-blue-600 font-bold text-[11px] flex items-center gap-1 uppercase underline decoration-2">Esporta Report</button>
     </div>
 
-    <section id="historyList" class="scroll-area space-y-3 pb-20"></section>
+    <section id="historyList" class="scroll-area space-y-3 pb-4"></section>
+
+    <footer class="py-2 text-center">
+        <button onclick="resetDay()" class="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-50 active:opacity-100 transition-opacity">
+            🗑️ Svuota memoria giornata
+        </button>
+    </footer>
 
     <div id="modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white w-full max-w-sm rounded-[2rem] p-5 shadow-2xl">
-            <h3 class="text-lg font-black text-slate-800 mb-4 text-center uppercase">Dettagli Lavoro</h3>
+            <h3 class="text-lg font-black text-slate-800 mb-4 text-center uppercase tracking-tight">Dettagli Lavoro</h3>
             
             <div class="mb-4">
-                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Prezzo (€)</label>
-                <div class="flex items-center justify-between gap-2 bg-slate-100 p-1 rounded-2xl">
+                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Importo (€)</label>
+                <div class="flex items-center justify-between gap-2 bg-slate-100 p-1 rounded-2xl border border-slate-200">
                     <button onclick="adjustPrice(-10)" class="w-12 h-12 bg-white rounded-xl font-black text-blue-600 shadow-sm border border-slate-200">-10</button>
                     <input type="number" id="modalPrice" class="w-20 text-center text-2xl font-black bg-transparent outline-none p-0" value="90">
                     <button onclick="adjustPrice(10)" class="w-12 h-12 bg-white rounded-xl font-black text-blue-600 shadow-sm border border-slate-200">+10</button>
@@ -73,11 +83,11 @@
             <div class="mb-4">
                 <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 text-center">Metodo Pagamento</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button id="btnCash" onclick="setPayment('CASH')" class="py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50">
-                        <span class="text-xl">💶</span> Contanti
+                    <button id="btnCash" onclick="setPayment('CASH')" class="py-3 border-2 border-slate-100 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 transition-all active:scale-95">
+                        <span class="text-lg">💶</span> Contanti
                     </button>
-                    <button id="btnPos" onclick="setPayment('POS')" class="py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50">
-                        <span class="text-xl">💳</span> POS
+                    <button id="btnPos" onclick="setPayment('POS')" class="py-3 border-2 border-slate-100 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 transition-all active:scale-95">
+                        <span class="text-lg">💳</span> POS
                     </button>
                 </div>
             </div>
@@ -117,7 +127,7 @@
         }
 
         function updateUI() {
-            const currentNum = state.history.length + 1;
+            const nextJobNum = state.history.length + 1;
             let total = 0, cash = 0, pos = 0;
             state.history.forEach(item => {
                 const p = parseFloat(item.price) || 0;
@@ -125,26 +135,34 @@
                 if(item.method === 'POS') pos += p; else cash += p;
             });
             
-            document.getElementById('jobDisplay').innerText = `Lavoro #${currentNum}`;
             document.getElementById('totalCash').innerText = `${total}€`;
             document.getElementById('subTotalCash').innerText = `${cash}€`;
             document.getElementById('subTotalPos').innerText = `${pos}€`;
+            document.getElementById('doneCount').innerText = state.history.length;
             
             const controls = document.getElementById('controls');
             const statusLabel = document.getElementById('statusLabel');
+            const jobDisplay = document.getElementById('jobDisplay');
+            const statusCard = document.getElementById('statusCard');
 
             if (state.isRunning) {
-                statusLabel.innerText = "● Timer Attivo";
+                jobDisplay.innerText = `Lavoro #${nextJobNum}`;
+                jobDisplay.className = "text-lg font-black text-blue-900 leading-tight";
+                statusLabel.innerText = "● Stai lavorando";
                 statusLabel.className = "text-[9px] font-bold uppercase text-blue-500 animate-pulse";
+                statusCard.style.borderColor = "#3b82f6";
                 controls.innerHTML = `
-                    <button onclick="handleNext()" class="py-5 rounded-2xl text-xl font-black bg-green-500 text-white shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 uppercase tracking-tight">Prossimo</button>
+                    <button onclick="handleNext()" class="py-5 rounded-2xl text-xl font-black bg-green-500 text-white shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 uppercase">Prossimo Lavoro</button>
                     <button onclick="handleStop()" class="py-3 rounded-xl text-sm font-bold bg-rose-50 text-rose-600 border border-rose-200 uppercase">Fermati</button>
                 `;
             } else {
-                statusLabel.innerText = "In pausa";
-                statusLabel.className = "text-[9px] font-bold uppercase text-amber-500";
+                jobDisplay.innerText = "PAUSA";
+                jobDisplay.className = "text-2xl font-black text-amber-500 leading-none mb-1";
+                statusLabel.innerHTML = `Prossimo lavoro: <span class="text-slate-600">#${nextJobNum}</span>`;
+                statusLabel.className = "text-[9px] font-bold uppercase text-slate-400";
+                statusCard.style.borderColor = "#f59e0b";
                 controls.innerHTML = `
-                    <button onclick="handleStart()" class="py-6 rounded-2xl text-2xl font-black bg-blue-600 text-white shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 uppercase tracking-tight">Inizia</button>
+                    <button onclick="handleStart()" class="py-6 rounded-2xl text-2xl font-black bg-blue-600 text-white shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 uppercase">Inizia Lavoro</button>
                 `;
             }
             renderHistory();
@@ -190,13 +208,13 @@
                         <p class="text-[10px] text-slate-400 italic line-clamp-1 max-w-[100px]">${item.note || 'Nota'}</p>
                     </div>
                 </div>
-            `).join('') || `<p class="text-center text-slate-300 py-10 text-[10px] uppercase italic">Nessuna attività</p>`;
+            `).join('') || `<p class="text-center text-slate-300 py-10 text-[10px] uppercase italic">Nessuna attività registrata</p>`;
         }
 
         function setPayment(method) {
             selectedPayment = method;
-            document.getElementById('btnCash').className = method === 'CASH' ? 'py-3 border-2 border-emerald-500 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-emerald-50 text-emerald-700' : 'py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50 text-slate-400';
-            document.getElementById('btnPos').className = method === 'POS' ? 'py-3 border-2 border-blue-500 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-blue-50 text-blue-700' : 'py-3 border-2 border-slate-100 rounded-xl font-bold flex flex-col items-center gap-1 text-sm bg-slate-50 text-slate-400';
+            document.getElementById('btnCash').className = method === 'CASH' ? 'py-3 border-2 border-emerald-500 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-emerald-50 text-emerald-700' : 'py-3 border-2 border-slate-100 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 text-slate-400';
+            document.getElementById('btnPos').className = method === 'POS' ? 'py-3 border-2 border-blue-500 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-blue-50 text-blue-700' : 'py-3 border-2 border-slate-100 rounded-xl font-bold flex items-center justify-center gap-2 text-sm bg-slate-50 text-slate-400';
         }
 
         function openModal(i) {
@@ -218,7 +236,8 @@
         }
 
         function deleteJob() { if (confirm("Eliminare?")) { state.history.splice(editingIndex, 1); save(); updateUI(); closeModal(); } }
-        
+        function resetDay() { if (confirm("⚠️ Svuotare tutto?")) { localStorage.removeItem('workTrackerBizV2'); location.reload(); } }
+
         function exportData() {
             let total = 0, cash = 0, pos = 0;
             state.history.forEach(item => {
@@ -226,9 +245,9 @@
                 total += p;
                 if(item.method === 'POS') pos += p; else cash += p;
             });
-            let text = `💰 REPORT: ${total}€ (Contanti: ${cash}€, POS: ${pos}€)\n`;
+            let text = `📅 REPORT OGGI: ${total}€\nLAVORI: ${state.history.length}\n💶 Cash: ${cash}€\n💳 POS: ${pos}€\n`;
             state.history.forEach((item, i) => { text += `\n#${state.history.length - i} | ${item.price}€ (${item.method}) | ${item.duration}`; });
-            if (navigator.share) navigator.share({ text: text }); else alert("Copiato!");
+            if (navigator.share) navigator.share({ text: text }); else alert("Report copiato!");
         }
 
         setInterval(() => { if (state.isRunning) document.getElementById('timerDisplay').innerText = formatTime(Date.now() - state.lastStartTime); }, 1000);
